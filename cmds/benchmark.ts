@@ -85,12 +85,12 @@ async function main() {
           txnhash = txnr.hash;
         }
         txhashs.push(txnhash);
-        // console.log(
-        //   sender_addr.toString().substring(0, 8),
-        //   sequence_number,
-        //   (+new Date() - _stime) / 1000,
-        //   txnhash
-        // );
+        console.log(
+          sender_addr.toString().substring(0, 8),
+          sequence_number,
+          (+new Date() - _stime) / 1000,
+          txnhash
+        );
       } catch (e) {
         txnerrors++;
         console.error(e);
@@ -118,7 +118,7 @@ async function main() {
     elapsed_avg = elapsed_avg + r.elapsed_avg;
   });
   elapsed_avg = elapsed_avg / results.length;
-  // console.table(results);
+  console.table(results);
   if (summary) {
     let txnsent = 0;
     let txnerrors = 0;
@@ -134,7 +134,7 @@ async function main() {
         start: start/1000,
         end: end/1000,
         elapsed_total: (end - start) / 1000,
-        elapsed_avg: elapsed_avg,
+        elapsed_avg: elapsed_avg.toFixed(3),
         txnsent,
         txnerrors,
         throughput: txnsent / ((end - start) / 1000),

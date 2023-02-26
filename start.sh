@@ -3,13 +3,13 @@
 APTOS_CONFIG_YAML=.aptos/config.yaml
 
 NETWORK=testnet
-PROCESSES=10
+PROCESSES=3
 KEY_PER_PROCESS=2
 TXN_NUM=50
 
 ALL_KEYS=$(("$PROCESSES"*"$KEY_PER_PROCESS"*2))
-OUTPUT=P${PROCESSES}_K${KEY_PER_PROCESS}_N${TXN_NUM}_$(date -Iseconds).txt
-SUMMARY=output/$OUTPUT.summary.txt
+OUTPUT=P${PROCESSES}_K${KEY_PER_PROCESS}_N${TXN_NUM}_$(date -Iseconds)
+SUMMARY=output/$OUTPUT.summary
 # WAIT_DONE='-w'
 
 function address() {
@@ -24,7 +24,10 @@ function keypair() {
    fi
    if ! grep -Fq "$1:" "$APTOS_CONFIG_YAML" > /dev/null 2>&1; then
       sleep 10
-      aptos init --assume-yes --network "$2" --profile "$1" --private-key-file ".key/$1" # >> /dev/null
+      aptos init --assume-yes --network "$NETWORK" --profile "$1" --private-key-file ".key/$1" # >> /dev/null
+   fi
+   if [ -n "$2" ]; then
+      aptos account transfer --assume-yes --profile "$1" --account "$2" --amount 100000000 | jq .Result.transaction_hash
    fi
    echo "$1" "$(address $1)"
 }
@@ -38,7 +41,7 @@ function benchmark() {
       RECIPIENTS="$RECIPIENTS $(address user$(($i*2)))"
    done
    # echo $_START, $KEYS, $RECIPIENTS
-   node dist/benchmark.js -p ${KEYS} -r ${RECIPIENTS} -a 1 -n "$TXN_NUM" $WAIT_DONE -u https://aptos-testnet.nodeinfra.com/fullnode/v1 -s "$SUMMARY" >> "output/$OUTPUT"
+   node dist/benchmark.js -p ${KEYS} -r ${RECIPIENTS} -a 1 -n "$TXN_NUM" $WAIT_DONE -u https://aptos-testnet.nodeinfra.com/fullnode/v1 -s "$SUMMARY"
 }
 
 function install_benchmark() {
@@ -63,7 +66,7 @@ function initialize_benchmark() {
       aptos init --assume-yes --network $NETWORK >> /dev/null
    fi
    for ((i=1; i <= "$ALL_KEYS"; i++)); do
-      keypair "user$i" "$NETWORK"
+      keypair "user$i" $1
    done
 }
 
@@ -72,7 +75,6 @@ function start_benchmark() {
    #    benchmark "$i"
    # done
    mkdir -p output
-   echo '' > "$SUMMARY"
    for i in $(seq 0 "$KEY_PER_PROCESS" $(("$PROCESSES" * "$KEY_PER_PROCESS" - 1))); do
       sleep 0.1
       benchmark "${i}" &
@@ -87,5 +89,5 @@ function start_benchmark() {
 }
 
 install_benchmark
-initialize_benchmark
+initialize_benchmark "$1"
 start_benchmark
