@@ -1,0 +1,4 @@
+[submodule "aptos-core"]
+	path = aptos-core
+	url = git@gitlab.platform.metapixel.io:metapixel/metapixel-aptos-core.git
+	branch = metapixel-processor

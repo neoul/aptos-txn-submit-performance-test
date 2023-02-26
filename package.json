@@ -1,0 +1,33 @@
+{
+  "name": "aptos-fullnode-performance-test-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "install": "npx tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aptos": "^1.5.0",
+    "dotenv": "^16.0.2"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^18.7.18",
+    "@types/supertest": "^2.0.12",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.39.0",
+    "commander": "^10.0.0",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-mocha": "^10.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.0",
+    "typescript": "4.8.3"
+  }
+}
