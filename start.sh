@@ -1,10 +1,11 @@
 #!/bin/bash
 
-APTOS_NODE_URL=https://aptos-testnet.nodeinfra.com/fullnode/v1
+# APTOS_NODE_URL=https://aptos-testnet.nodeinfra.com/fullnode/v1
+APTOS_NODE_URL=https://npixel-test.ninodes.com/fullnode
 NETWORK=testnet
-PROCESSES=4
+PROCESSES=10
 KEY_PER_PROCESS=2
-TXN_NUM=50
+TXN_NUM=100
 # WAIT_DONE='-w'
 
 ## A-->B: 1~10 --> 11~20
