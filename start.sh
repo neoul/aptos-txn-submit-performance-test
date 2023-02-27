@@ -2,6 +2,7 @@
 
 APTOS_CONFIG_YAML=.aptos/config.yaml
 
+APTOS_NODE_URL=https://aptos-testnet.nodeinfra.com/fullnode/v1
 NETWORK=testnet
 PROCESSES=3
 KEY_PER_PROCESS=2
@@ -23,13 +24,14 @@ function keypair() {
       chmod go-wrx .key
    fi
    if ! grep -Fq "$1:" "$APTOS_CONFIG_YAML" > /dev/null 2>&1; then
-      sleep 10
-      aptos init --assume-yes --network "$NETWORK" --profile "$1" --private-key-file ".key/$1" # >> /dev/null
+      aptos init --assume-yes --network "$NETWORK" --profile "$1" --private-key-file ".key/$1" --skip-faucet >> /dev/null 2>&1
+      sleep 1
    fi
    if [ -n "$2" ]; then
-      aptos account transfer --assume-yes --profile "$1" --account "$2" --amount 100000000 | jq .Result.transaction_hash
+      echo "$1" "$(address $1)" fund=$(aptos account transfer --assume-yes --profile default --account "$1" --amount 100000000 | jq .Result.transaction_hash)
+   else
+      echo "$1" "$(address $1)"
    fi
-   echo "$1" "$(address $1)"
 }
 
 function benchmark() {
@@ -41,7 +43,7 @@ function benchmark() {
       RECIPIENTS="$RECIPIENTS $(address user$(($i*2)))"
    done
    # echo $_START, $KEYS, $RECIPIENTS
-   node dist/benchmark.js -p ${KEYS} -r ${RECIPIENTS} -a 1 -n "$TXN_NUM" $WAIT_DONE -u https://aptos-testnet.nodeinfra.com/fullnode/v1 -s "$SUMMARY"
+   node dist/benchmark.js -p ${KEYS} -r ${RECIPIENTS} -a 1 -n "$TXN_NUM" $WAIT_DONE -u "$APTOS_NODE_URL" -s "$SUMMARY"
 }
 
 function install_benchmark() {
@@ -63,7 +65,7 @@ function install_benchmark() {
 
 function initialize_benchmark() {
    if [ ! -f $APTOS_CONFIG_YAML ]; then
-      aptos init --assume-yes --network $NETWORK >> /dev/null
+      aptos init --assume-yes --network "$NETWORK" --private-key "$1" >> /dev/null
    fi
    for ((i=1; i <= "$ALL_KEYS"; i++)); do
       keypair "user$i" $1
@@ -88,6 +90,25 @@ function start_benchmark() {
    echo ... complete ...
 }
 
+if [ -z "$1" ]; then
+   if ! yq ".profiles.default.account" "$APTOS_CONFIG_YAML" >> /dev/null 2>&1 ; then
+      echo "ERR:INVALID_USAGE: $0 ${FUNCNAME[0]} PRIVATE_KEY_OF_DEFAULT_PROFILE"
+      exit 1
+   fi
+else
+   if yq ".profiles.default.account" "$APTOS_CONFIG_YAML" >> /dev/null 2>&1; then
+      BALANCE=$(aptos account list --query balance --url "$APTOS_NODE_URL" --account $(address default) \
+         | jq .Result[0].coin.value | tr -d '"')
+      BALANCE_TO_NEED=$(("$ALL_KEYS" * 100000000))
+      if [[ $BALANCE -le $BALANCE_TO_NEED ]]; then
+         echo "ERR:NOT_ENOUGH_BALANCE_IN_DEFAULT_PROFILE"
+         exit 1
+      fi
+   fi
+   
+fi
+
+DEFAULT_PROFILE_PRIVATEKEY=$1
 install_benchmark
-initialize_benchmark "$1"
+initialize_benchmark "$DEFAULT_PROFILE_PRIVATEKEY"
 start_benchmark
