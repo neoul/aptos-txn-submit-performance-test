@@ -1,13 +1,15 @@
 # Transaction submit test for Aptos fullnode
 
- 
+This performance test submits a number of transactions to a Aptos fullnode.
+0.00000001 APT is transfered among accounts created for the test.
+To initialize the test, you have to input the private key of the `default` profile as the following example.
 
 ```bash
 # Initialize the test accounts
 # `DEFAULT_PROFILE_PRIVATE_KEY` must have aptos coin amount enough to fund to the test accounts.
 ./start.sh DEFAULT_PROFILE_PRIVATE_KEY
 
-# Run start.sh without `DEFAULT_PROFILE_PRIVATE_KEY` after the test accounts are initialized.
+# It is ok to run start.sh without `DEFAULT_PROFILE_PRIVATE_KEY` after the default account profile are initialized.
 ./start.sh
 ```
 
