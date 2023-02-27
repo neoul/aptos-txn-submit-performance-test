@@ -57,11 +57,19 @@ async function main() {
         const _stime = +new Date();
         const recv_account_address = AccountAddress.fromHex(receiver);
         const ctype = new TypeTagStruct(StructTag.fromString('0x1::aptos_coin::AptosCoin'));
+        // const entryFunctionPayload = new TransactionPayloadEntryFunction(
+        //   EntryFunction.natural(
+        //     '0x1::coin',
+        //     'transfer',
+        //     [ctype],
+        //     [BCS.bcsToBytes(recv_account_address), BCS.bcsSerializeUint64(amount)]
+        //   )
+        // );
         const entryFunctionPayload = new TransactionPayloadEntryFunction(
           EntryFunction.natural(
             '0x1::aptos_account',
             'transfer',
-            [ctype],
+            [],
             [BCS.bcsToBytes(recv_account_address), BCS.bcsSerializeUint64(amount)]
           )
         );
@@ -137,7 +145,7 @@ async function main() {
         elapsed_avg: elapsed_avg.toFixed(3),
         txnsent,
         txnerrors,
-        throughput: txnsent / ((end - start) / 1000),
+        throughput: Number((txnsent / ((end - start) / 1000)).toFixed(3)),
       }) + '\n'
     );
   }
